@@ -1,0 +1,71 @@
+{
+    "parameter": {
+        "epochs": {
+            "value": 25,
+            "explanation": "An 'epoch' in deep learning is one full pass of the model through all the training data, where the model learns and adjusts to improve its predictions."
+        },
+        "early_stopping_patience": {
+            "value": 5,
+            "explanation": "'Early stopping patience' is a setting that tells the model to stop training if it doesn't improve after a certain number of tries (validation steps), helping to avoid wasting time on unnecessary training."
+        },
+        "validation_interval": {
+            "value": 5,
+            "explanation": "The 'validation interval' is the frequency (in epochs) at which the model checks its performance on a separate set of data during training to see how well it's learning."
+        },
+        "scheduler_step_by": {
+            "value": "epoch",
+            "explanation": "The 'scheduler step by' setting determines whether the optimizer adjusts its learning rate after each 'epoch' (a full pass through the data) or after each 'iteration' (a single step of training on a batch of data)."
+        },
+        "images_to_visualize": {
+            "value": 4,
+            "explanation": "'Images to visualize' is the number of sample images saved during validation or testing to help evaluate how well the model is making predictions."
+        },
+        "pos_enc": {
+            "value": 5,
+            "explanation": "Positional encoding adds spatial information to input coordinates, where higher values represent finer details or more precise positions, and lower values capture broader, more general spatial information, helping the model reconstruct the geometry and structure of scenes."
+        },
+        "accum_gradients": {
+            "value": 4,
+            "explanation": "The number of times gradients are accumulated before performing a backward pass, helping to simulate a larger batch size without increasing memory usage."
+        },
+        "batch_size": {
+            "value": 64,
+            "explanation": "The number of samples per batch during training. Higher numbers usually lead to more stable training, but eventually lead to 'OOM (out of memory)' errors."
+        },
+        "beam_samples": {
+            "value": 64,
+            "explanation": "The number of samples taken along each EM beam of the STEM simulator, controlling the level of detail and accuracy of the reconstructed sample, with higher values providing more precise results but at a higher computational cost."
+        }
+
+
+    },
+    "train_subset": 1.0,
+    "reduce_epochs": 0.2,
+    "method": "grid",
+    "hyperparameter": {
+        "learning_rate": {
+            "default": 5e-5,
+            "values": [
+                5e-4,
+                5e-5,
+                5e-6
+            ],
+            "explanation": "Controls the step size at each iteration while optimizing the model's weights. A higher learning rate may lead to faster convergence but risks overshooting the optimal solution, while a lower rate ensures smoother convergence but may require more training time."
+        },
+        "batch_size": {
+            "default": 4,
+            "values": [
+                4,
+                8
+            ],
+            "explanation": "The number of samples per batch during training. Higher numbers usually lead to more stable training, but eventually lead to 'OOM (out of memory)' errors."
+        },
+        "resize": {
+            "default": 100,
+            "values": [
+                100
+            ],
+            "explanation": "Downsizing the tilt series for faster model training. However, note that stonger downscaling leads to stronger loss of information."
+        }
+    }
+}
