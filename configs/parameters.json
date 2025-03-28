@@ -39,7 +39,7 @@
 
 
     },
-    "train_subset": 1.0,
+    "train_subset": 0.2,
     "reduce_epochs": 0.2,
     "method": "grid",
     "hyperparameter": {
@@ -61,9 +61,9 @@
             "explanation": "The number of samples per batch during training. Higher numbers usually lead to more stable training, but eventually lead to 'OOM (out of memory)' errors."
         },
         "resize": {
-            "default": 100,
+            "default": 10,
             "values": [
-                100
+                500
             ],
             "explanation": "Downsizing the tilt series for faster model training. However, note that stonger downscaling leads to stronger loss of information."
         }

@@ -16,7 +16,7 @@ def posenc_fct(n_posenc, x):
 # define model as MLP to predict single density value given a 3D position in the reconstruction space
 class Model(AbstractModel):
     def __init__(self, n_posenc=10, n_features=256, n_layers=6, skip_layer=0):
-        super(Model, self).__init__()
+        super().__init__()
         self.n_posenc = n_posenc
         self.skip_layer = skip_layer
 

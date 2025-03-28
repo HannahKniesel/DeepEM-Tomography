@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 import json
 import time
-import tqdm
+from tqdm import tqdm
 import tifffile as tiff
 
 
@@ -57,6 +57,9 @@ class Inference(AbstractInference):
         mlp =  Model(n_posenc = self.metadata["pos_enc"], n_features = 256, n_layers = 6, skip_layer = 0).cuda()
         return mlp
     
+    def load_single_image(self, path):
+        return
+    
     def inference(self):
         dataset = TiltSeries_Dataset(self.data_path, resize = self.resize)
         dataloader = DataLoader(dataset, batch_size=self.metadata["batch_size"], shuffle=True)
@@ -66,7 +69,7 @@ class Inference(AbstractInference):
         best_train_loss = np.inf
 
         print_info("Start Model Training...")
-        for epoch in range(self.metadata["epochs"]):
+        for epoch in tqdm(range(self.metadata["epochs"]), desc="Model Training"):
             start_time = time.time()
             
             avg_loss = 0
@@ -105,13 +108,9 @@ class Inference(AbstractInference):
                 torch.save(self.model.state_dict(), os.path.join(self.save_to, "mlp.pth")) 
                 with open(self.save_to+"/config.json", "w") as outfile: 
                     json.dump(self.metadata, outfile)
-                print_info(f"Saved currently best model states at {self.save_to} with training loss = {avg_loss/len(dataloader)}")  
                 best_train_loss = avg_loss 
             end_time = time.time()
-            elapsed_time = end_time - start_time
-            accum_time += elapsed_time
-            remaining_time = (self.metadata["epochs"] - (epoch+1))*(accum_time/(epoch+1))
-            print_info(f"Avg time single epoch: {format_time(accum_time/(epoch+1))} | Remaining time training: {format_time(remaining_time)}")
+            
         print_info("Finished model training. Tomogramm is being computed...\n")
         
         with torch.no_grad():

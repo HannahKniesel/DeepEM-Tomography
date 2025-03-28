@@ -193,7 +193,7 @@ class ModelTrainer(AbstractModelTrainer):
             file_name (str): Prefix for the saved image files.
         """
         with torch.no_grad():
-            predicted_micrographs_small = []
+            # predicted_micrographs_small = []
             predicted_micrographs = []
             micrographs = []
             
@@ -203,7 +203,7 @@ class ModelTrainer(AbstractModelTrainer):
                 samples = samples.reshape(-1,3)
                 densities = self.model_small(samples.cuda())   
                 predicted_detections = accumulate_beams(densities, samples, self.parameter["beam_samples"])
-                predicted_micrographs_small.extend(predicted_detections.cpu().numpy())
+                # predicted_micrographs_small.extend(predicted_detections.cpu().numpy())
                 
                 samples = density_based_samples(densities, distances, beam_origins, beam_directions, beam_ends, self.parameter["beam_samples"])
                 samples = samples.reshape(-1,3)
@@ -215,7 +215,7 @@ class ModelTrainer(AbstractModelTrainer):
                 if(len(micrographs)>= max_number_rays):
                     break
             
-            predicted_micrographs_small = np.array(predicted_micrographs_small)
+            # predicted_micrographs_small = np.array(predicted_micrographs_small)
             predicted_micrographs = np.array(predicted_micrographs)
             micrographs = np.array(micrographs)
 
@@ -223,7 +223,7 @@ class ModelTrainer(AbstractModelTrainer):
             for val_idx in range(self.parameter["images_to_visualize"]): 
                 start_idx = val_idx * self.parameter["resize"]**2
                 end_idx = start_idx + (self.parameter["resize"]**2)
-                predicted_micrograph_small = predicted_micrographs_small[start_idx:end_idx].reshape(self.parameter["resize"], self.parameter["resize"])
+                # predicted_micrograph_small = predicted_micrographs_small[start_idx:end_idx].reshape(self.parameter["resize"], self.parameter["resize"])
                 predicted_micrograph = predicted_micrographs[start_idx:end_idx].reshape(self.parameter["resize"], self.parameter["resize"])
                 micrograph = micrographs[start_idx:end_idx].reshape(self.parameter["resize"], self.parameter["resize"])
                 fig,axs = plt.subplots(1,2)
@@ -240,7 +240,6 @@ class ModelTrainer(AbstractModelTrainer):
                 
                 plt.savefig(os.path.join(self.logger.samples_dir, f"{file_name}_{val_idx}.png"))
                 plt.close()
-            self.logger.log_info(f"Saved visualizations to {os.path.join(self.logger.samples_dir, f'{file_name}_*')}")
                 
             
        
@@ -323,10 +322,9 @@ class ModelTrainer(AbstractModelTrainer):
         # Implementation could look like this:
         return self.val_step(batch)
     
-    def test(self):
-        super().test()
-        
+    def test(self, evaluate_on_full):
         with torch.no_grad():
+            super().test(evaluate_on_full)
             # load metadata
             with open(os.path.join(os.path.join(self.data_path, "noisy-projections"),"metadata.json"), 'r') as file:
                 metadata = json.load(file)
@@ -337,19 +335,18 @@ class ModelTrainer(AbstractModelTrainer):
             
             test_dataset = Reconstruction_Dataset(self.parameter["resize"], slice_thickness_nm, pixelsize, original_px_resolution, os.path.join(self.data_path,"phantom-volume", "volume.raw"))
             test_dataloader = DataLoader(test_dataset, batch_size=self.parameter["batch_size"], shuffle=False, drop_last = False)
-            with torch.no_grad(): 
-                reconstruction = []
-                for samples in tqdm(test_dataloader, desc="Generate Tomogram"): 
-                    densities = self.model(samples.cuda())
-                    reconstruction.extend(densities.cpu().numpy().astype(np.float16))
-                reconstruction = min_max_norm_np(np.array(reconstruction).reshape(test_dataset.x_dim, test_dataset.y_dim, test_dataset.z_dim))
-                if(not(test_dataset.volume is None)):
-                    mse = criterion(torch.from_numpy(reconstruction), torch.from_numpy(test_dataset.volume))
-                    # Calculate average test loss
-                    self.logger.log_info(f"Test loss phantom: {mse:.4f}")               
-                
-                reconstruction = (reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)              
-                tiff.imwrite(os.path.join(self.logger.samples_dir, f"tomogram.tif"), reconstruction)
+            reconstruction = []
+            for samples in tqdm(test_dataloader, desc="Generate Tomogram"): 
+                densities = self.model(samples.cuda())
+                reconstruction.extend(densities.cpu().numpy().astype(np.float16))
+            reconstruction = min_max_norm_np(np.array(reconstruction).reshape(test_dataset.x_dim, test_dataset.y_dim, test_dataset.z_dim))
+            if(not(test_dataset.volume is None)):
+                mse = criterion(torch.from_numpy(reconstruction), torch.from_numpy(test_dataset.volume))
+                # Calculate average test loss
+                self.logger.log_info(f"MSE phantom: {mse:.4f}")               
+            
+            reconstruction = (reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)              
+            tiff.imwrite(os.path.join(self.logger.samples_dir, f"tomogram.tif"), reconstruction)
 
         self.logger.log_info(f"Evaluation Tomogram was saved to {os.path.join(self.logger.samples_dir, f'tomogram.tif')}")
 
@@ -383,7 +380,6 @@ class ModelTrainer(AbstractModelTrainer):
         # Save latest model for possible resuming of training
         checkpoint_path = os.path.join(self.logger.checkpoints_dir, f"latest_model.pth")
         torch.save(checkpoint, checkpoint_path)
-        self.logger.log_info(f"Current model checkpoint saved to {checkpoint_path}")
         
         
         # Save best model for later use    
@@ -397,13 +393,11 @@ class ModelTrainer(AbstractModelTrainer):
             # Save model, optimizer, and scheduler state
             torch.save(checkpoint, checkpoint_path)
 
-            self.logger.log_info(f"Best model checkpoint saved to {checkpoint_path} (Validation Loss: {val_loss:.4f})")
             
         else:
             self.patience_counter += 1
-            self.logger.log_info(f"No improvement in validation loss. Patience counter: {self.patience_counter}/{self.parameter['early_stopping_patience']}")
 
-    def load_checkpoint(self, checkpoint_path):
+    def load_checkpoint(self, checkpoint_path, finetuning = False):
         """
         Load the model, optimizer, and scheduler state from a checkpoint to resume training.
 
@@ -436,6 +430,13 @@ class ModelTrainer(AbstractModelTrainer):
         self.patience_counter = 0  # Reset patience counter
         
         
-        self.logger.log_info(f"Resumed training from checkpoint: {checkpoint_path} (Validation Loss: {self.best_val_loss:.4f})")
+        if(finetuning):
+            self.start_epoch = checkpoint['epoch']
+            self.logger.log_info(f"Resumed training from checkpoint: {checkpoint_path} (Validation Loss: {self.best_val_loss:.4f}) | Remaining epochs: {self.num_epochs - self.start_epoch}")
+            
+        else: 
+            self.start_epoch = 0
+            self.logger.log_info(f"Loaded model checkpoint for finetuning from: {checkpoint_path} (Validation Loss: {self.best_val_loss:.4f})")
+            
 
     
