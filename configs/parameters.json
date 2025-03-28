@@ -61,7 +61,7 @@
             "explanation": "The number of samples per batch during training. Higher numbers usually lead to more stable training, but eventually lead to 'OOM (out of memory)' errors."
         },
         "resize": {
-            "default": 10,
+            "default": 500,
             "values": [
                 500
             ],
