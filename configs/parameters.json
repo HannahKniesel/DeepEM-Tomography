@@ -40,7 +40,7 @@
 
     },
     "train_subset": 0.2,
-    "reduce_epochs": 0.2,
+    "reduce_epochs": 0.1,
     "method": "grid",
     "hyperparameter": {
         "learning_rate": {
@@ -63,7 +63,7 @@
         "resize": {
             "default": 500,
             "values": [
-                500
+                100
             ],
             "explanation": "Downsizing the tilt series for faster model training. However, note that stonger downscaling leads to stronger loss of information."
         }
