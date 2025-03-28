@@ -15,6 +15,13 @@ TL;DR 🧬✨ We use deep learning for tomographic reconstruction of 2D STEM pro
 
 ![Teaser](./images/Teaser.gif)
 
+---
+
+[1] Kniesel, Hannah, et al. "Clean implicit 3D structure from noisy 2D STEM images." Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2022.
+
+[2] Mildenhall, Ben, et al. "Nerf: Representing scenes as neural radiance fields for view synthesis." Communications of the ACM 65.1 (2021): 99-106.
+
+
 ## Lightning AI 
 Get started via Lightning AI. Duplicate the studio by clicking the button below: 
 
