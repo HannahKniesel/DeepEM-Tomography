@@ -420,20 +420,17 @@ class ModelTrainer(AbstractModelTrainer):
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model_small.load_state_dict(checkpoint['small_model_state_dict'])
         
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        self.optimizer_small.load_state_dict(checkpoint['small_optimizer_state_dict'])
-        
-        if self.scheduler and checkpoint['scheduler_state_dict']:
-            self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-        
-        self.best_val_loss = checkpoint['val_loss']
-        self.patience_counter = 0  # Reset patience counter
-        
-        
-        if(finetuning):
-            self.start_epoch = checkpoint['epoch']
-            self.logger.log_info(f"Resumed training from checkpoint: {checkpoint_path} (Validation Loss: {self.best_val_loss:.4f}) | Remaining epochs: {self.num_epochs - self.start_epoch}")
+        if(not finetuning):
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.optimizer_small.load_state_dict(checkpoint['small_optimizer_state_dict'])
             
+            if self.scheduler and checkpoint['scheduler_state_dict']:
+                self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+            
+            self.best_val_loss = checkpoint['val_loss']
+            self.patience_counter = 0  # Reset patience counter
+            self.logger.log_info(f"Resumed training from checkpoint: {checkpoint_path} (Validation Loss: {self.best_val_loss:.4f}) | Remaining epochs: {self.num_epochs - self.start_epoch}")
+
         else: 
             self.start_epoch = 0
             self.logger.log_info(f"Loaded model checkpoint for finetuning from: {checkpoint_path} (Validation Loss: {self.best_val_loss:.4f})")
