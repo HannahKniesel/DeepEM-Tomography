@@ -420,7 +420,10 @@ class ModelTrainer(AbstractModelTrainer):
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model_small.load_state_dict(checkpoint['small_model_state_dict'])
         
+        
         if(not finetuning):
+            self.save_checkpoint(checkpoint['epoch'], checkpoint['val_loss'])
+            
             self.start_epoch = checkpoint['epoch']
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.optimizer_small.load_state_dict(checkpoint['small_optimizer_state_dict'])
