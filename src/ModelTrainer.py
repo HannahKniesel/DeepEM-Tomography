@@ -67,7 +67,8 @@ class ModelTrainer(AbstractModelTrainer):
                     "pos_enc": self.parameter["pos_enc"], 
                     "beam_samples": self.parameter["beam_samples"],
                     "accum_gradients": self.parameter["accum_gradients"], 
-                    "resize": self.parameter["resize"]}
+                    "resize": self.parameter["resize"], 
+                    "data_path": self.data_path}
         return metadata
         
             
@@ -84,9 +85,18 @@ class ModelTrainer(AbstractModelTrainer):
             val_dataset (torch.utils.data.Dataset): The dataset for the validation dataset.
             test_dataset (torch.utils.data.Dataset): The dataset for the test dataset.
         """
+        if(not os.path.isdir(self.data_path, "noisy-projections")):
+            self.logger.log_error(f"Data path {self.data_path} does not contain a folder 'noisy-projections'. Please provide a data path which contains a folder 'noisy-projections'.")
+            return None, None, None
+        
         train_dataset = TiltSeries_Dataset(os.path.join(self.data_path, "noisy-projections"), resize = self.parameter["resize"])
-        val_dataset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=0.2, resize = self.parameter["resize"])
-        test_dataset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=1.0, resize = self.parameter["resize"])
+        
+        if(os.path.isdir(os.path.join(self.data_path, "clean-projections"))):
+            val_dataset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=0.2, resize = self.parameter["resize"])
+            test_dataset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=1.0, resize = self.parameter["resize"])
+        else: 
+            val_dataset = TiltSeries_Dataset(os.path.join(self.data_path, "noisy-projections"), percentage=0.2, resize = self.parameter["resize"])
+            test_dataset = TiltSeries_Dataset(os.path.join(self.data_path, "noisy-projections"), percentage=1.0, resize = self.parameter["resize"])
 
 
         return train_dataset, val_dataset, test_dataset
@@ -105,8 +115,13 @@ class ModelTrainer(AbstractModelTrainer):
             val_vis_loader (torch.utils.data.DataLoader): The dataloader for visualizing a subset of the validation dataset.
             test_vis_loader (torch.utils.data.DataLoader): The dataloader for visualizing a subset of the test dataset.
         """
-        
-        vis_val_subset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=1.0, resize = self.parameter["resize"])
+        if(os.path.isdir(os.path.join(self.data_path, "clean-projections"))):
+            vis_val_subset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=1.0, resize = self.parameter["resize"])
+        elif(os.path.isdir(os.path.join(self.data_path, "noisy-projections"))): 
+            vis_val_subset = TiltSeries_Dataset(os.path.join(self.data_path, "noisy-projections"), percentage=1.0, resize = self.parameter["resize"])
+        else:
+            self.logger.log_error(f"Data path {self.data_path} does not contain a folder 'noisy-projections'. Please provide a data path which contains a folder 'noisy-projections' containing the tilt series.")
+            return None, None
         val_vis_loader = DataLoader(vis_val_subset, batch_size=self.parameter["batch_size"], shuffle=False)
         
         test_vis_loader = val_vis_loader
@@ -332,23 +347,23 @@ class ModelTrainer(AbstractModelTrainer):
             slice_thickness_nm = metadata["slice_thickness_nm"]
             original_px_resolution = metadata["original_px_resolution"]
             
-            
-            test_dataset = Reconstruction_Dataset(self.parameter["resize"], slice_thickness_nm, pixelsize, original_px_resolution, os.path.join(self.data_path,"phantom-volume", "volume.raw"))
-            test_dataloader = DataLoader(test_dataset, batch_size=self.parameter["batch_size"], shuffle=False, drop_last = False)
-            reconstruction = []
-            for samples in tqdm(test_dataloader, desc="Generate Tomogram"): 
-                densities = self.model(samples.cuda())
-                reconstruction.extend(densities.cpu().numpy().astype(np.float16))
-            reconstruction = min_max_norm_np(np.array(reconstruction).reshape(test_dataset.x_dim, test_dataset.y_dim, test_dataset.z_dim))
-            if(not(test_dataset.volume is None)):
-                mse = criterion(torch.from_numpy(reconstruction), torch.from_numpy(test_dataset.volume))
-                # Calculate average test loss
-                self.logger.log_info(f"MSE phantom: {mse:.4f}")               
-            
-            reconstruction = (reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)              
-            tiff.imwrite(os.path.join(self.logger.samples_dir, f"tomogram.tif"), reconstruction)
+            if(os.path.isfile(os.path.join(self.data_path, "phantom-volume", "volume.raw"))):
+                test_dataset = Reconstruction_Dataset(self.parameter["resize"], slice_thickness_nm, pixelsize, original_px_resolution, os.path.join(self.data_path,"phantom-volume", "volume.raw"))
+                test_dataloader = DataLoader(test_dataset, batch_size=self.parameter["batch_size"], shuffle=False, drop_last = False)
+                reconstruction = []
+                for samples in tqdm(test_dataloader, desc="Generate Tomogram"): 
+                    densities = self.model(samples.cuda())
+                    reconstruction.extend(densities.cpu().numpy().astype(np.float16))
+                reconstruction = min_max_norm_np(np.array(reconstruction).reshape(test_dataset.x_dim, test_dataset.y_dim, test_dataset.z_dim))
+                if(not(test_dataset.volume is None)):
+                    mse = criterion(torch.from_numpy(reconstruction), torch.from_numpy(test_dataset.volume))
+                    # Calculate average test loss
+                    self.logger.log_info(f"MSE phantom: {mse:.4f}")               
+                
+                reconstruction = (reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)              
+                tiff.imwrite(os.path.join(self.logger.samples_dir, f"tomogram.tif"), reconstruction)
 
-        self.logger.log_info(f"Evaluation Tomogram was saved to {os.path.join(self.logger.samples_dir, f'tomogram.tif')}")
+                self.logger.log_info(f"Evaluation Tomogram was saved to {os.path.join(self.logger.samples_dir, f'tomogram.tif')}")
 
 
     def save_checkpoint(self, epoch, val_loss):
