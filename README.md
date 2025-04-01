@@ -29,6 +29,15 @@ Get started via Lightning AI. Duplicate the studio by clicking the button below:
 ## Docker 
 Docker image is available at `hannahkniesel/deepem_tomography`
 
+Start the docker like this: 
+```bash
+docker run --gpus all -it -p 8888:8888 --rm --ipc=host -v /local_dir/:/workspace/ --name <container-name> hannahkniesel/deepem_tomography bash
+```
+Inside the container start `jupyter notebook`
+```bash
+jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
+``` 
+
 ## Citation
 
 If you find this code useful, please cite us: 
