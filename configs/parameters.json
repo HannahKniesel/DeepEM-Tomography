@@ -24,10 +24,6 @@
             "value": 5,
             "explanation": "Positional encoding adds spatial information to input coordinates, where higher values represent finer details or more precise positions, and lower values capture broader, more general spatial information, helping the model reconstruct the geometry and structure of scenes."
         },
-        "accum_gradients": {
-            "value": 4,
-            "explanation": "The number of times gradients are accumulated before performing a backward pass, helping to simulate a larger batch size without increasing memory usage."
-        },
         "batch_size": {
             "value": 64,
             "explanation": "The number of samples per batch during training. Higher numbers usually lead to more stable training, but eventually lead to 'OOM (out of memory)' errors."
@@ -52,7 +48,7 @@
             ],
             "explanation": "Controls the step size at each iteration while optimizing the model's weights. A higher learning rate may lead to faster convergence but risks overshooting the optimal solution, while a lower rate ensures smoother convergence but may require more training time."
         },
-        "batch_size": {
+        "accum_gradients": {
             "default": 4,
             "values": [
                 4,
