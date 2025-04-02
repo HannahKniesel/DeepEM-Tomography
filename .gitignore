@@ -178,5 +178,9 @@ logs
 pretrained_models/
 logs
 logs/
+.submit.yml
+runjupyter.sh
+slurm_log/
+
 
 .ipynb_checkpoints/
