@@ -85,7 +85,7 @@ class ModelTrainer(AbstractModelTrainer):
             val_dataset (torch.utils.data.Dataset): The dataset for the validation dataset.
             test_dataset (torch.utils.data.Dataset): The dataset for the test dataset.
         """
-        if(not os.path.isdir(self.data_path, "noisy-projections")):
+        if(not os.path.isdir(os.path.join(self.data_path, "noisy-projections"))):
             self.logger.log_error(f"Data path {self.data_path} does not contain a folder 'noisy-projections'. Please provide a data path which contains a folder 'noisy-projections'.")
             return None, None, None
         

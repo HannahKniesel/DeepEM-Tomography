@@ -64,7 +64,6 @@ class TiltSeries_Dataset(Dataset):
         # Image Normalization: min-max normalization to make micrograph intensities to a fixed range of [0,1]
         noisy_projections = np.array(noisy_projections)
         noisy_projections = min_max_norm_np(noisy_projections)
-        print(f"INFO::Applied minmax normalization to tilt series. \n Current max = {noisy_projections.max():.4f} | Current min = {noisy_projections.min():.4f}")
         
         # load tilt angles
         angles_degree = load_angles(glob(os.path.join(noisy_dir,"*.rawtlt"))[0])
