@@ -36,7 +36,7 @@
 
     },
     "train_subset": 0.2,
-    "reduce_epochs": 0.1,
+    "reduce_epochs": 0.25,
     "method": "grid",
     "hyperparameter": {
         "learning_rate": {
