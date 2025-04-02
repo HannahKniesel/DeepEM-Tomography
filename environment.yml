@@ -1,4 +1,4 @@
-name: deepEM-tomography
+name: deepem_tomography
 channels:
   - defaults
 dependencies:
