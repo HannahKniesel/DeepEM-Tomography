@@ -16,7 +16,7 @@ import tifffile as tiff
 
 
 from deepEM.Inferencer import AbstractInference
-from deepEM.Utils import print_error,print_info,print_warning,format_time, find_model_file
+from deepEM.Utils import print_error,print_info,print_warning,format_time, find_model_file,find_file
 from src.Model import Model 
 from src.Dataset import TiltSeries_Dataset, Reconstruction_Dataset, min_max_norm_np
 from src.STEM import uniform_samples, density_based_samples, accumulate_beams
@@ -96,7 +96,8 @@ class Inference(AbstractInference):
     def inference(self):        
         with torch.no_grad():            
             # load metadata
-            with open(os.path.join(self.data_path,"metadata.json"), 'r') as file:
+            metadata_path = find_file(self.data_path, "metadata.json")
+            with open(metadata_path, 'r') as file:
                 metadata = json.load(file)
             pixelsize = metadata["pixelsize_nmperpixel"]
             slice_thickness_nm = metadata["slice_thickness_nm"]
