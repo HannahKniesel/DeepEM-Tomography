@@ -358,12 +358,16 @@ class ModelTrainer(AbstractModelTrainer):
                 if(not(test_dataset.volume is None)):
                     mse = criterion(torch.from_numpy(reconstruction), torch.from_numpy(test_dataset.volume))
                     # Calculate average test loss
-                    self.logger.log_info(f"MSE phantom: {mse:.4f}")               
+                    self.logger.log_info(f"MSE phantom: {mse:.4f}") 
+                    metric = {"MSE phantom": mse}        
+                    self.logger.append_test_results(metric)      
                 
                 reconstruction = 255-(reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)              
                 tiff.imwrite(os.path.join(self.logger.samples_dir, f"tomogram.tif"), reconstruction)
 
                 self.logger.log_info(f"Evaluation Tomogram was saved to {os.path.join(self.logger.samples_dir, f'tomogram.tif')}")
+
+
 
 
     def save_checkpoint(self, epoch, val_loss):

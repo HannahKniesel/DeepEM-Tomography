@@ -265,6 +265,16 @@ class Logger:
         with open(save_to, "w") as f:
             f.write(result_str)
         return
+    
+    def append_test_results(self, metrics):
+        save_to = os.path.join(self.log_dir, "test_results.txt")
+        result_str = f""
+        for metric in metrics.keys(): 
+            result_str += f"{metric}: {metrics[metric]:.4f}\n"   
+            
+        with open(save_to, "a") as f:
+            f.write(result_str)
+        return
                
             
             
