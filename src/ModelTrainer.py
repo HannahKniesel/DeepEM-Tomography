@@ -360,7 +360,7 @@ class ModelTrainer(AbstractModelTrainer):
                     # Calculate average test loss
                     self.logger.log_info(f"MSE phantom: {mse:.4f}")               
                 
-                reconstruction = (reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)              
+                reconstruction = 255-(reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)              
                 tiff.imwrite(os.path.join(self.logger.samples_dir, f"tomogram.tif"), reconstruction)
 
                 self.logger.log_info(f"Evaluation Tomogram was saved to {os.path.join(self.logger.samples_dir, f'tomogram.tif')}")
@@ -443,7 +443,7 @@ class ModelTrainer(AbstractModelTrainer):
                 self.save_checkpoint(checkpoint['epoch'], checkpoint['val_loss'])
             except: 
                 pass
-            
+
             self.start_epoch = checkpoint['epoch']
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.optimizer_small.load_state_dict(checkpoint['small_optimizer_state_dict'])

@@ -9,7 +9,7 @@
             "explanation": "'Early stopping patience' is a setting that tells the model to stop training if it doesn't improve after a certain number of tries (validation steps), helping to avoid wasting time on unnecessary training."
         },
         "validation_interval": {
-            "value": 5,
+            "value": 3,
             "explanation": "The 'validation interval' is the frequency (in epochs) at which the model checks its performance on a separate set of data during training to see how well it's learning."
         },
         "scheduler_step_by": {

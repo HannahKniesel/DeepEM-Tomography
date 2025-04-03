@@ -112,7 +112,7 @@ class Inference(AbstractInference):
                     densities = self.model(samples.cuda())
                     reconstruction.extend(densities.cpu().numpy().astype(np.float16))
                 reconstruction = min_max_norm_np(np.array(reconstruction).reshape(test_dataset.x_dim, test_dataset.y_dim, test_dataset.z_dim))
-                reconstruction = (reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)
+                reconstruction = 255-(reconstruction*255).astype(np.uint8).transpose(2,0,1) # (depth, height, width)
                 tiff.imwrite(os.path.join(self.save_to,"tomogram.tif"), reconstruction)
 
         print_info(f"Tomogram was saved to {os.path.join(self.save_to,'tomogram.tif')}")
