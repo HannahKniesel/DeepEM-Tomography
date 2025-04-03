@@ -2,7 +2,6 @@ import tifffile
 from PIL import Image
 from typing import Any, List
 import torch
-import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
