@@ -525,7 +525,7 @@ class AbstractModelTrainer(ABC):
         metrics_sum = {}  # To store the sum of metrics across batches
         num_batches = len(self.test_loader)
 
-        for batch in self.test_loader:
+        for batch in tqdm(self.test_loader, desc="Evaluate"):
             loss, batch_metrics = self.test_step(batch)
             test_loss += loss
 
