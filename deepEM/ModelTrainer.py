@@ -414,7 +414,11 @@ class AbstractModelTrainer(ABC):
         
 
         if(not finetuning):
-            self.save_checkpoint(checkpoint['epoch'], checkpoint['val_loss'])
+            try:
+                # should only save when training was done. Does not save model checkpoint to evaluate. 
+                self.save_checkpoint(checkpoint['epoch'], checkpoint['val_loss'])
+            except: 
+                pass
             
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             if self.scheduler and checkpoint['scheduler_state_dict']:
@@ -595,7 +599,7 @@ class AbstractModelTrainer(ABC):
             if self.scheduler and (self.parameter['scheduler_step_by'] == "epoch"):
                 self.scheduler.step()
         self.logger.plot_training_curves(train_loss_history, train_epoch, val_loss_history, val_epoch, show = True)
-        self.logger.log_info(f"Finished training. Find logs and model checkpoints at: {self.logger.log_dir}\n")
+        self.logger.log_info(f"Finished training. Find logs and model checkpoints at: {self.logger.log_dir}")
         return np.min(val_loss_history)
 
 
