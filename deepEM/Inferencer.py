@@ -27,6 +27,9 @@ class AbstractInference(ABC):
         """
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model_path = find_model_file(model_path)
+        if(not os.path.isfile(self.model_path)):
+           print_error(f"Could not find a model file at {self.model_path}. Please make sure you provide a model .pth file for inference.")
+           return
         self.data_path = data_path
         self.batch_size = batch_size
 
@@ -61,6 +64,8 @@ class AbstractInference(ABC):
         """
         checkpoint = torch.load(self.model_path)
         return checkpoint["metadata"]
+
+       
 
     def load_checkpoint(self) -> None:
         """
