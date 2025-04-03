@@ -1,7 +1,7 @@
 {
     "parameter": {
         "epochs": {
-            "value": 25,
+            "value": 20,
             "explanation": "An 'epoch' in deep learning is one full pass of the model through all the training data, where the model learns and adjusts to improve its predictions."
         },
         "early_stopping_patience": {

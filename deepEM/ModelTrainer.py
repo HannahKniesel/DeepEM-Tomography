@@ -470,7 +470,7 @@ class AbstractModelTrainer(ABC):
         # Validation loop
         
         with torch.no_grad():            
-            if((epoch % self.validation_interval) == 0):
+            if(((epoch % self.validation_interval) == 0) or (epoch == (self.num_epochs-1))):
                 val_loss = 0.0
                 self.model.eval()
                 self.qualify(self.val_vis_loader, f"validation_epoch-{epoch}")
@@ -509,8 +509,7 @@ class AbstractModelTrainer(ABC):
         """
         Run the test loop after training.
         """
-        self.logger.init(f"Evaluate")
-        self.logger.init_directories()
+        
         if(evaluate_on_full):
             # reinit dataset with no train/test_split
             combined_dataset = ConcatDataset([self.train_loader.dataset, self.val_loader.dataset, self.test_loader.dataset])
