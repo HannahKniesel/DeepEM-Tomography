@@ -115,14 +115,14 @@ class ModelTrainer(AbstractModelTrainer):
             val_vis_loader (torch.utils.data.DataLoader): The dataloader for visualizing a subset of the validation dataset.
             test_vis_loader (torch.utils.data.DataLoader): The dataloader for visualizing a subset of the test dataset.
         """
-        if(os.path.isdir(os.path.join(self.data_path, "clean-projections"))):
-            vis_val_subset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=1.0, resize = self.parameter["resize"])
-        elif(os.path.isdir(os.path.join(self.data_path, "noisy-projections"))): 
-            vis_val_subset = TiltSeries_Dataset(os.path.join(self.data_path, "noisy-projections"), percentage=1.0, resize = self.parameter["resize"])
-        else:
-            self.logger.log_error(f"Data path {self.data_path} does not contain a folder 'noisy-projections'. Please provide a data path which contains a folder 'noisy-projections' containing the tilt series.")
-            return None, None
-        val_vis_loader = DataLoader(vis_val_subset, batch_size=self.parameter["batch_size"], shuffle=False)
+        # if(os.path.isdir(os.path.join(self.data_path, "clean-projections"))):
+        #     vis_val_subset = TiltSeries_Dataset(os.path.join(self.data_path, "clean-projections"), percentage=1.0, resize = self.parameter["resize"])
+        # elif(os.path.isdir(os.path.join(self.data_path, "noisy-projections"))): 
+        #     vis_val_subset = TiltSeries_Dataset(os.path.join(self.data_path, "noisy-projections"), percentage=1.0, resize = self.parameter["resize"])
+        # else:
+        #     self.logger.log_error(f"Data path {self.data_path} does not contain a folder 'noisy-projections'. Please provide a data path which contains a folder 'noisy-projections' containing the tilt series.")
+        #     return None, None
+        val_vis_loader = self.test_loader # DataLoader(vis_val_subset, batch_size=self.parameter["batch_size"], shuffle=False)
         
         test_vis_loader = val_vis_loader
         return val_vis_loader, test_vis_loader
