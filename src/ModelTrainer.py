@@ -437,7 +437,12 @@ class ModelTrainer(AbstractModelTrainer):
         
         
         if(not finetuning):
-            self.save_checkpoint(checkpoint['epoch'], checkpoint['val_loss'])
+
+            try:
+                # should only save when training was done. Does not save model checkpoint to evaluate. 
+                self.save_checkpoint(checkpoint['epoch'], checkpoint['val_loss'])
+            except: 
+                pass
             
             self.start_epoch = checkpoint['epoch']
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
