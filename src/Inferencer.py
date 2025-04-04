@@ -75,8 +75,8 @@ class Inference(AbstractInference):
         Returns: 
             torch.nn.Module: the model
         """
-        self.model_small =  Model(n_posenc = self.metadata["pos_enc"]//2, n_features = 128, n_layers = 3, skip_layer = 0).cuda()
-        mlp =  Model(n_posenc = self.metadata["pos_enc"], n_features = 256, n_layers = 6, skip_layer = 0).cuda()
+        self.model_small =  Model(n_posenc = self.metadata["pos_enc"]//2, n_features = 128, n_layers = 3, skip_layer = 0).to(self.device)
+        mlp =  Model(n_posenc = self.metadata["pos_enc"], n_features = 256, n_layers = 6, skip_layer = 0).to(self.device)
         return mlp
     
     def load_checkpoint(self):

@@ -45,8 +45,8 @@ class ModelTrainer(AbstractModelTrainer):
         Returns:
             model (lib.Model.AbstractModel): The dataloader for the training dataset.
         """
-        self.model_small =  Model(n_posenc = self.parameter["pos_enc"]//2, n_features = 128, n_layers = 3, skip_layer = 0).cuda()
-        mlp =  Model(n_posenc = self.parameter["pos_enc"], n_features = 256, n_layers = 6, skip_layer = 0).cuda()
+        self.model_small =  Model(n_posenc = self.parameter["pos_enc"]//2, n_features = 128, n_layers = 3, skip_layer = 0).to(self.device)
+        mlp =  Model(n_posenc = self.parameter["pos_enc"], n_features = 256, n_layers = 6, skip_layer = 0).to(self.device)
 
         return mlp
 
@@ -433,7 +433,7 @@ class ModelTrainer(AbstractModelTrainer):
         """
         checkpoint = torch.load(checkpoint_path)
         self.parameter = checkpoint['parameter']
-        self.prepare(set_parameters=False)
+        self.prepare(set_parameters=False, num_epochs=self.num_epochs)
         
         
         self.model.load_state_dict(checkpoint['model_state_dict'])
@@ -449,6 +449,10 @@ class ModelTrainer(AbstractModelTrainer):
                 pass
 
             self.start_epoch = checkpoint['epoch']
+            remaining_epochs = self.num_epochs - self.start_epoch
+            if(remaining_epochs <= 0):
+                self.logger.log_warning(f"Current number of training epochs ({self.num_epochs}) is smaller or equal than last epoch of the loaded model ({self.start_epoch}). Will train the model for {self.num_epochs} epochs.")
+                self.start_epoch = 0
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.optimizer_small.load_state_dict(checkpoint['small_optimizer_state_dict'])
             
@@ -463,5 +467,6 @@ class ModelTrainer(AbstractModelTrainer):
             self.start_epoch = 0
             self.logger.log_info(f"Loaded model checkpoint for finetuning from: {checkpoint_path} (Validation Loss: {self.best_val_loss:.4f})")
             
+        self.model.to(self.device)
 
     
