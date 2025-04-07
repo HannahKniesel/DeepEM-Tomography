@@ -441,7 +441,8 @@ class ModelTrainer(AbstractModelTrainer):
         self.model_small.load_state_dict(checkpoint['small_model_state_dict'])
 
         try:
-            with open(os.path.join(os.path.join(self.data_path, "noisy-projections"),"metadata.json"), 'r') as file:
+            print(f"Try to load metadata from: {os.path.join(self.data_path, "noisy-projections","metadata.json")}")
+            with open(os.path.join(self.data_path, "noisy-projections","metadata.json"), 'r') as file:
                 metadata = json.load(file)
             pixelsize = metadata["pixelsize_nmperpixel"]
             slice_thickness_nm = metadata["slice_thickness_nm"]
@@ -454,7 +455,7 @@ class ModelTrainer(AbstractModelTrainer):
                 self.logger.log_warning(f"The original pixel resolution of the dataset at {self.data_path} ({original_px_resolution}) differs from the original pixel resolution of the loaded model ({checkpoint['metadata']['original_px_resolution']}). Predictions are likely to be incorrect. Make sure that the model you load for evaluation was trained on the data specified on top of this notebook.")
         except: 
             pass
-          
+
         if(not finetuning):
 
             try:
