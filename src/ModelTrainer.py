@@ -13,6 +13,7 @@ from deepEM.ModelTrainer import AbstractModelTrainer
 from src.Model import Model 
 from src.Dataset import TiltSeries_Dataset, Reconstruction_Dataset, min_max_norm_np
 from src.STEM import uniform_samples, density_based_samples, accumulate_beams
+from deepEM.Utils import find_file
 
 criterion = torch.nn.MSELoss()
 
@@ -61,6 +62,13 @@ class ModelTrainer(AbstractModelTrainer):
             dict: dictonary with metadata
             
         """
+        metadata_path = find_file(self.data_path, "metadata.json")
+        with open(metadata_path, 'r') as file:
+            metadata = json.load(file)
+        pixelsize = metadata["pixelsize_nmperpixel"]
+        slice_thickness_nm = metadata["slice_thickness_nm"]
+        original_px_resolution = metadata["original_px_resolution"]
+    
         metadata = {"epochs": self.num_epochs, 
                     "lr": self.parameter["learning_rate"],
                     "batch_size": self.parameter["batch_size"], 
@@ -68,7 +76,10 @@ class ModelTrainer(AbstractModelTrainer):
                     "beam_samples": self.parameter["beam_samples"],
                     "accum_gradients": self.parameter["accum_gradients"], 
                     "resize": self.parameter["resize"], 
-                    "data_path": self.data_path}
+                    "data_path": self.data_path, 
+                    "pixelsize_nmperpixel": pixelsize,
+                    "slice_thickness_nm": slice_thickness_nm, 
+                    "original_px_resolution": original_px_resolution}
         return metadata
         
             
@@ -459,7 +470,7 @@ class ModelTrainer(AbstractModelTrainer):
             print(f"Pixelsize: {pixelsize} vs. {checkpoint['metadata']['pixelsize_nmperpixel']}")
             print(f"Pixelsize: {original_px_resolution} vs. {checkpoint['metadata']['original_px_resolution']}")
             print(f"Slice Thickness: {slice_thickness_nm} vs. {checkpoint['metadata']['slice_thickness_nm']}")
-            
+
         except Exception as e:
             traceback.print_exc()  # This prints the full traceback to stderr
             

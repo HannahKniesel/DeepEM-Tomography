@@ -96,13 +96,9 @@ class Inference(AbstractInference):
     def inference(self):        
         with torch.no_grad():            
             # load metadata
-            metadata_path = find_file(self.data_path, "metadata.json")
-            with open(metadata_path, 'r') as file:
-                metadata = json.load(file)
-            pixelsize = metadata["pixelsize_nmperpixel"]
-            slice_thickness_nm = metadata["slice_thickness_nm"]
-            original_px_resolution = metadata["original_px_resolution"]
-            
+            pixelsize = self.metadata["pixelsize_nmperpixel"]
+            slice_thickness_nm = self.metadata["slice_thickness_nm"]
+            original_px_resolution = self.metadata["original_px_resolution"]            
             
             test_dataset = Reconstruction_Dataset(self.resize, slice_thickness_nm, pixelsize, original_px_resolution)
             test_dataloader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, drop_last = False)
