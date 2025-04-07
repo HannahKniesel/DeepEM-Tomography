@@ -443,6 +443,8 @@ class ModelTrainer(AbstractModelTrainer):
         try:
 
             print(f"Try to load metadata from: {os.path.join(self.data_path, 'noisy-projections','metadata.json')}")
+            
+
             with open(os.path.join(self.data_path, "noisy-projections","metadata.json"), 'r') as file:
                 metadata = json.load(file)
             pixelsize = metadata["pixelsize_nmperpixel"]
@@ -454,6 +456,10 @@ class ModelTrainer(AbstractModelTrainer):
                 self.logger.log_warning(f"The slice thickness in nm of the dataset at {self.data_path} ({slice_thickness_nm}) differs from the slice thickness in nm of the loaded model ({checkpoint['metadata']['slice_thickness_nm']}). Predictions are likely to be incorrect. Make sure that the model you load for evaluation was trained on the data specified on top of this notebook.")
             if(checkpoint['metadata']['original_px_resolution'] != original_px_resolution):
                 self.logger.log_warning(f"The original pixel resolution of the dataset at {self.data_path} ({original_px_resolution}) differs from the original pixel resolution of the loaded model ({checkpoint['metadata']['original_px_resolution']}). Predictions are likely to be incorrect. Make sure that the model you load for evaluation was trained on the data specified on top of this notebook.")
+            print(f"Pixelsize: {pixelsize} vs. {checkpoint['metadata']['pixelsize_nmperpixel']}")
+            print(f"Pixelsize: {original_px_resolution} vs. {checkpoint['metadata']['original_px_resolution']}")
+            print(f"Slice Thickness: {slice_thickness_nm} vs. {checkpoint['metadata']['slice_thickness_nm']}")
+            
         except Exception as e:
             traceback.print_exc()  # This prints the full traceback to stderr
             
