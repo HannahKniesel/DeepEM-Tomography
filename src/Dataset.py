@@ -44,7 +44,13 @@ class TiltSeries_Dataset(Dataset):
         # gather and load micrographs
         image_files = os.path.join(noisy_dir,"*"+image_format)
         noisy_projections = sorted(glob(image_files))
-        print(f"INFO::Found {len(noisy_projections)} images within tilt series at {image_files}.")            
+        print(f"INFO::Found {len(noisy_projections)} images within tilt series at {image_files}.")    
+        # pick subset for validation
+        if(percentage > 0):
+            indices = np.random.choice(np.arange(len(noisy_projections)), size=(int(percentage*len(noisy_projections),)), replace=False)
+            noisy_projections = [projection for i,projection in enumerate(noisy_projections) if(i in indices)]
+            print(f"INFO::Use {int(percentage*100)}% for validation, resulting in {len(noisy_projections)} projection images.")
+
         noisy_projections = [cv2.imread(noisy_projection, cv2.IMREAD_GRAYSCALE) for noisy_projection in noisy_projections]
         
         
@@ -67,13 +73,11 @@ class TiltSeries_Dataset(Dataset):
         
         # load tilt angles
         angles_degree = load_angles(glob(os.path.join(noisy_dir,"*.rawtlt"))[0])
-
-        # pick subset for validation
-        if((percentage > 0)):
-            indices = np.random.choice(np.arange(len(noisy_projections)), size=(int(percentage*len(noisy_projections),)), replace=False)
-            noisy_projections = [projection for i,projection in enumerate(noisy_projections) if(i in indices)]
+        if(percentage > 0):
             angles_degree = [angle for i,angle in enumerate(angles_degree) if(i in indices)]
-            print(f"INFO::Use {int(percentage*100)}% for validation, resulting in {len(noisy_projections)} projection images.")
+
+
+        
         self.num_images = len(noisy_projections)
 
         # Retrieve beam data for STEM simulator from images
@@ -91,7 +95,6 @@ class TiltSeries_Dataset(Dataset):
             sample_from.extend(bool_arr)
             self.beam_detections.extend(beam_detection)
 
-        
         self.indices = np.arange(len(self.beam_detections))[sample_from]
 
     def __len__(self):
