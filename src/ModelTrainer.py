@@ -341,6 +341,7 @@ class ModelTrainer(AbstractModelTrainer):
         with torch.no_grad():
             super().test(evaluate_on_full)
             # load metadata
+            # TODO retrieve from checkpoint
             with open(os.path.join(os.path.join(self.data_path, "noisy-projections"),"metadata.json"), 'r') as file:
                 metadata = json.load(file)
             pixelsize = metadata["pixelsize_nmperpixel"]
@@ -438,8 +439,22 @@ class ModelTrainer(AbstractModelTrainer):
         
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model_small.load_state_dict(checkpoint['small_model_state_dict'])
-        
-        
+
+        try:
+            with open(os.path.join(os.path.join(self.data_path, "noisy-projections"),"metadata.json"), 'r') as file:
+                metadata = json.load(file)
+            pixelsize = metadata["pixelsize_nmperpixel"]
+            slice_thickness_nm = metadata["slice_thickness_nm"]
+            original_px_resolution = metadata["original_px_resolution"]
+            if(checkpoint['metadata']['pixelsize_nmperpixel'] != pixelsize):
+                self.logger.log_warning(f"The pixel size of the dataset at {self.data_path} ({pixelsize}) differs from the pixelsize of the loaded model ({checkpoint['metadata']['pixelsize_nmperpixel']}). Predictions are likely to be incorrect. Make sure that the model you load for evaluation was trained on the data specified on top of this notebook.")
+            if(checkpoint['metadata']['slice_thickness_nm'] != slice_thickness_nm):
+                self.logger.log_warning(f"The slice thickness in nm of the dataset at {self.data_path} ({slice_thickness_nm}) differs from the slice thickness in nm of the loaded model ({checkpoint['metadata']['slice_thickness_nm']}). Predictions are likely to be incorrect. Make sure that the model you load for evaluation was trained on the data specified on top of this notebook.")
+            if(checkpoint['metadata']['original_px_resolution'] != original_px_resolution):
+                self.logger.log_warning(f"The original pixel resolution of the dataset at {self.data_path} ({original_px_resolution}) differs from the original pixel resolution of the loaded model ({checkpoint['metadata']['original_px_resolution']}). Predictions are likely to be incorrect. Make sure that the model you load for evaluation was trained on the data specified on top of this notebook.")
+        except: 
+            pass
+          
         if(not finetuning):
 
             try:
