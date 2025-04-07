@@ -441,7 +441,7 @@ class ModelTrainer(AbstractModelTrainer):
         self.model_small.load_state_dict(checkpoint['small_model_state_dict'])
 
         try:
-            print(f"Try to load metadata from: {os.path.join(self.data_path, "noisy-projections","metadata.json")}")
+            print(f"Try to load metadata from: {os.path.join(self.data_path, 'noisy-projections','metadata.json')}")
             with open(os.path.join(self.data_path, "noisy-projections","metadata.json"), 'r') as file:
                 metadata = json.load(file)
             pixelsize = metadata["pixelsize_nmperpixel"]
